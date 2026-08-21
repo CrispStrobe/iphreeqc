@@ -112,6 +112,7 @@ private:
 	static int phase_vm_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int pr_phi_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int t_sc_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int square_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int log10_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int log_activity_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int kinetics_moles_callback(struct mb_interpreter_t* interpreter, void** local);

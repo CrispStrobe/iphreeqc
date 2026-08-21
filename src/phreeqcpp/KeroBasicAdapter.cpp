@@ -246,7 +246,8 @@ std::string translate_identifiers(const std::string& statement)
 				{"MID$", "KEROMID"},
 				{"INSTR", "KEROINSTR"},
 				{"ARCTAN", "ATAN"},
-				{"SQRT", "SQR"}
+				{"SQRT", "SQR"},
+				{"SQR", "KEROSQUARE"}
 			};
 			bool string_function_replaced = false;
 			for (size_t function = 0; wb && function < sizeof(string_functions) / sizeof(string_functions[0]); ++function)
@@ -750,6 +751,7 @@ int KeroBasicAdapter::basic_compile(const char* commands, void** lnbase, void** 
 		{"PHASEZUNDERSCOREZVM", phase_vm_callback},
 		{"PRZUNDERSCOREZPHI", pr_phi_callback},
 		{"TZUNDERSCOREZSC", t_sc_callback},
+		{"KEROSQUARE", square_callback},
 		{"KEROLOG10", log10_callback},
 		{"LA", log_activity_callback},
 		{"KIN", kinetics_moles_callback},
@@ -1933,6 +1935,18 @@ KERO_NAMED_CALLBACK(phase_vm_callback, VALUE_PHASE_VM)
 KERO_NAMED_CALLBACK(pr_phi_callback, VALUE_PR_PHI)
 KERO_NAMED_CALLBACK(t_sc_callback, VALUE_T_SC)
 #undef KERO_NAMED_CALLBACK
+
+int KeroBasicAdapter::square_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	mb_value_t value;
+	LDBLE number = 0;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	mb_check(mb_pop_value(interpreter, local, &value));
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	if (!numeric_value(value, number)) return MB_FUNC_ERR;
+	mb_check(mb_push_real(interpreter, local, static_cast<real_t>(number * number)));
+	return MB_FUNC_OK;
+}
 
 int KeroBasicAdapter::log10_callback(struct mb_interpreter_t* interpreter, void** local)
 {
