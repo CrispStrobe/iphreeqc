@@ -23,8 +23,27 @@ public:
 
 private:
 	struct Program;
+	enum ChemistryValue
+	{
+		VALUE_ACTIVITY,
+		VALUE_MOLALITY,
+		VALUE_TOTAL,
+		VALUE_SATURATION_INDEX,
+		VALUE_SATURATION_RATIO,
+		VALUE_LOG_MOLALITY,
+		VALUE_SPECIES_DELTA_H
+	};
 
 	static int save_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int punch_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int parm_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int activity_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int molality_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int total_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int saturation_index_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int saturation_ratio_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int log_molality_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int species_delta_h_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int print_callback(struct mb_interpreter_t* interpreter, const char* format, ...);
 	static int input_callback(struct mb_interpreter_t* interpreter, const char* prompt, char* buffer, int length);
 	static int import_callback(struct mb_interpreter_t* interpreter, const char* path);
@@ -41,6 +60,10 @@ private:
 	static std::string transform_source(const char* commands);
 	static bool is_dispose_command(const char* commands);
 	static KeroBasicAdapter* from_interpreter(struct mb_interpreter_t* interpreter);
+	static int named_chemistry_callback(
+		struct mb_interpreter_t* interpreter,
+		void** local,
+		ChemistryValue kind);
 
 	int report_error(const std::string& context);
 	int set_runtime_values(Program* program);

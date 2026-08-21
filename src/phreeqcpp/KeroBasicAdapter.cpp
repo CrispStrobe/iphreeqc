@@ -95,6 +95,25 @@ std::string translate_jump_targets(const std::string& statement)
 	return result;
 }
 
+std::string translate_identifiers(const std::string& statement)
+{
+	std::string result;
+	bool quoted = false;
+	for (std::string::size_type i = 0; i < statement.size(); ++i)
+	{
+		if (statement[i] == '"') quoted = !quoted;
+		if (!quoted && statement[i] == '_')
+		{
+			result += "ZUNDERSCOREZ";
+		}
+		else
+		{
+			result += statement[i];
+		}
+	}
+	return result;
+}
+
 std::string transform_statement(const std::string& statement)
 {
 	std::string::size_type first = statement.find_first_not_of(" \t");
@@ -105,9 +124,14 @@ std::string transform_statement(const std::string& statement)
 	if (starts_with_word(body, "SAVE"))
 	{
 		std::string expression = body.substr(4);
-		return prefix + "KEROSAVE(" + expression + ")";
+		return prefix + "KEROSAVE(" + translate_identifiers(expression) + ")";
 	}
-	return prefix + translate_jump_targets(body);
+	if (starts_with_word(body, "PUNCH"))
+	{
+		std::string expressions = body.substr(5);
+		return prefix + "KEROPUNCH(" + translate_identifiers(expressions) + ")";
+	}
+	return prefix + translate_identifiers(translate_jump_targets(body));
 }
 }
 
@@ -173,6 +197,36 @@ int KeroBasicAdapter::basic_compile(const char* commands, void** lnbase, void** 
 		LastError = "could not register SAVE callback";
 		return report_error("compile");
 	}
+	if (mb_register_func(program->interpreter, "KEROPUNCH", punch_callback) == 0)
+	{
+		destroy_program(program);
+		LastError = "could not register PUNCH callback";
+		return report_error("compile");
+	}
+	struct Callback
+	{
+		const char* name;
+		mb_func_t callback;
+	};
+	const Callback callbacks[] = {
+		{"PARM", parm_callback},
+		{"ACT", activity_callback},
+		{"MOL", molality_callback},
+		{"TOT", total_callback},
+		{"SI", saturation_index_callback},
+		{"SR", saturation_ratio_callback},
+		{"LM", log_molality_callback},
+		{"DELTAZUNDERSCOREZHZUNDERSCOREZSPECIES", species_delta_h_callback}
+	};
+	for (size_t i = 0; i < sizeof(callbacks) / sizeof(callbacks[0]); ++i)
+	{
+		if (mb_register_func(program->interpreter, callbacks[i].name, callbacks[i].callback) == 0)
+		{
+			destroy_program(program);
+			LastError = std::string("could not register ") + callbacks[i].name;
+			return report_error("compile");
+		}
+	}
 
 	std::string source = transform_source(commands);
 	if (mb_load_string(program->interpreter, source.c_str(), true) != MB_FUNC_OK)
@@ -237,6 +291,103 @@ int KeroBasicAdapter::save_callback(struct mb_interpreter_t* interpreter, void**
 	return MB_FUNC_OK;
 }
 
+int KeroBasicAdapter::punch_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	KeroBasicAdapter* adapter = from_interpreter(interpreter);
+	if (!adapter) return MB_FUNC_ERR;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	while (mb_has_arg(interpreter, local))
+	{
+		mb_value_t value;
+		mb_check(mb_pop_value(interpreter, local, &value));
+		if (value.type == MB_DT_INT)
+		{
+			adapter->PhreeqcPtr->fpunchf_user(
+				adapter->PhreeqcPtr->n_user_punch_index++,
+				adapter->PhreeqcPtr->high_precision ? "%20.12e\t" : "%12.4e\t",
+				static_cast<double>(value.value.integer));
+		}
+		else if (value.type == MB_DT_REAL)
+		{
+			adapter->PhreeqcPtr->fpunchf_user(
+				adapter->PhreeqcPtr->n_user_punch_index++,
+				adapter->PhreeqcPtr->high_precision ? "%20.12e\t" : "%12.4e\t",
+				static_cast<double>(value.value.float_point));
+		}
+		else if (value.type == MB_DT_STRING)
+		{
+			adapter->PhreeqcPtr->fpunchf_user(
+				adapter->PhreeqcPtr->n_user_punch_index++,
+				"%s\t",
+				value.value.string);
+		}
+		else
+		{
+			adapter->LastError = "PUNCH supports only numeric and string values";
+			return MB_FUNC_ERR;
+		}
+	}
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	mb_check(mb_push_int(interpreter, local, 0));
+	return MB_FUNC_OK;
+}
+
+int KeroBasicAdapter::parm_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	int_t index = 0;
+	KeroBasicAdapter* adapter = from_interpreter(interpreter);
+	if (!adapter) return MB_FUNC_ERR;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	mb_check(mb_pop_int(interpreter, local, &index));
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	if (index < 1 || index > adapter->PhreeqcPtr->count_rate_p ||
+		static_cast<size_t>(index) > adapter->PhreeqcPtr->rate_p.size())
+	{
+		adapter->LastError = "PARM index is out of range";
+		return MB_FUNC_ERR;
+	}
+	mb_check(mb_push_real(
+		interpreter,
+		local,
+		static_cast<real_t>(adapter->PhreeqcPtr->rate_p[static_cast<size_t>(index - 1)])));
+	return MB_FUNC_OK;
+}
+
+int KeroBasicAdapter::activity_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_ACTIVITY);
+}
+
+int KeroBasicAdapter::molality_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_MOLALITY);
+}
+
+int KeroBasicAdapter::total_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_TOTAL);
+}
+
+int KeroBasicAdapter::saturation_index_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_SATURATION_INDEX);
+}
+
+int KeroBasicAdapter::saturation_ratio_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_SATURATION_RATIO);
+}
+
+int KeroBasicAdapter::log_molality_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_LOG_MOLALITY);
+}
+
+int KeroBasicAdapter::species_delta_h_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	return named_chemistry_callback(interpreter, local, VALUE_SPECIES_DELTA_H);
+}
+
 int KeroBasicAdapter::print_callback(struct mb_interpreter_t* interpreter, const char* format, ...)
 {
 	char buffer[4096];
@@ -274,6 +425,7 @@ void KeroBasicAdapter::error_callback(
 {
 	KeroBasicAdapter* adapter = from_interpreter(interpreter);
 	if (!adapter) return;
+	if (!adapter->LastError.empty()) return;
 	std::ostringstream message;
 	message << (description ? description : "MY-BASIC error") << " at " << row << ':' << column;
 	adapter->LastError = message.str();
@@ -324,6 +476,58 @@ KeroBasicAdapter* KeroBasicAdapter::from_interpreter(struct mb_interpreter_t* in
 	void* userdata = NULL;
 	if (!interpreter || mb_get_userdata(interpreter, &userdata) != MB_FUNC_OK) return NULL;
 	return static_cast<KeroBasicAdapter*>(userdata);
+}
+
+int KeroBasicAdapter::named_chemistry_callback(
+	struct mb_interpreter_t* interpreter,
+	void** local,
+	ChemistryValue kind)
+{
+	char* name = NULL;
+	LDBLE value = 0;
+	KeroBasicAdapter* adapter = from_interpreter(interpreter);
+	if (!adapter) return MB_FUNC_ERR;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	mb_check(mb_pop_string(interpreter, local, &name));
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	if (!name)
+	{
+		adapter->LastError = "chemistry function requires a name";
+		return MB_FUNC_ERR;
+	}
+	switch (kind)
+	{
+	case VALUE_ACTIVITY:
+		value = adapter->PhreeqcPtr->activity(name);
+		break;
+	case VALUE_MOLALITY:
+		value = adapter->PhreeqcPtr->molality(name);
+		break;
+	case VALUE_TOTAL:
+		value = adapter->PhreeqcPtr->total(name);
+		break;
+	case VALUE_SATURATION_INDEX:
+		{
+			LDBLE iap = 0;
+			if (adapter->PhreeqcPtr->saturation_index(name, &iap, &value) != OK)
+			{
+				adapter->LastError = std::string("could not calculate SI for ") + name;
+				return MB_FUNC_ERR;
+			}
+		}
+		break;
+	case VALUE_SATURATION_RATIO:
+		value = adapter->PhreeqcPtr->saturation_ratio(name);
+		break;
+	case VALUE_LOG_MOLALITY:
+		value = adapter->PhreeqcPtr->log_molality(name);
+		break;
+	case VALUE_SPECIES_DELTA_H:
+		value = adapter->PhreeqcPtr->calc_deltah_s(name);
+		break;
+	}
+	mb_check(mb_push_real(interpreter, local, static_cast<real_t>(value)));
+	return MB_FUNC_OK;
 }
 
 int KeroBasicAdapter::report_error(const std::string& context)
