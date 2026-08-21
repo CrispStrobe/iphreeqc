@@ -175,6 +175,7 @@ private:
 	static int data_restore_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int data_read_number_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int data_read_string_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int array_budget_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int print_callback(struct mb_interpreter_t* interpreter, const char* format, ...);
 	static int input_callback(struct mb_interpreter_t* interpreter, const char* prompt, char* buffer, int length);
 	static int import_callback(struct mb_interpreter_t* interpreter, const char* path);
@@ -228,6 +229,7 @@ private:
 	int RecursionDepth;
 	size_t OutputBytes;
 	size_t Statements;
+	size_t ArrayElements;
 	std::chrono::steady_clock::time_point Deadline;
 };
 

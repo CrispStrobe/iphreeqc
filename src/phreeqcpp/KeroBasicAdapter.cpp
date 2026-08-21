@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iomanip>
+#include <limits>
 #include <map>
 #include <mutex>
 #include <sstream>
@@ -25,6 +26,7 @@ namespace
 {
 const char KERO_EOL_NOTAB_MARKER[] = "\x1eKEROTAKIS_EOL_NOTAB\x1e";
 const char KERO_NO_NEWLINE_MARKER[] = "\x1eKEROTAKIS_NO_NEWLINE\x1e";
+const size_t KERO_ARRAY_ELEMENT_BUDGET = 1000000;
 
 std::recursive_mutex& my_basic_mutex()
 {
@@ -561,6 +563,14 @@ std::string transform_statement(const std::string& statement, size_t* plot_xy_in
 				bound += bounds[i];
 			}
 			if (!first_output) rewritten << '\n';
+			rewritten << prefix << "KEROCHECKARRAY(";
+			for (size_t i = 0; i < bound_names.size(); ++i)
+			{
+				if (i != 0) rewritten << ',';
+				rewritten << bound_names[i];
+			}
+			rewritten << ')';
+			if (!bound_names.empty()) rewritten << '\n';
 			rewritten << prefix << "DIM " << translate_identifiers(item.substr(begin, open - begin + 1));
 			for (size_t i = 0; i < bound_names.size(); ++i)
 			{
@@ -619,7 +629,7 @@ struct KeroBasicAdapter::Program
 };
 
 KeroBasicAdapter::KeroBasicAdapter(Phreeqc* phreeqc)
-	: PhreeqcPtr(phreeqc), ActiveProgram(NULL), RecursionDepth(0), OutputBytes(0), Statements(0)
+	: PhreeqcPtr(phreeqc), ActiveProgram(NULL), RecursionDepth(0), OutputBytes(0), Statements(0), ArrayElements(0)
 {
 	std::lock_guard<std::recursive_mutex> lock(my_basic_mutex());
 	if (!my_basic_initialized())
@@ -805,7 +815,8 @@ int KeroBasicAdapter::basic_compile(const char* commands, void** lnbase, void** 
 		{"KEROPLOTXY", plot_xy_callback},
 		{"KERODATARESTORE", data_restore_callback},
 		{"KERODATAREADNUMBER", data_read_number_callback},
-		{"KERODATAREADSTRING", data_read_string_callback}
+		{"KERODATAREADSTRING", data_read_string_callback},
+		{"KEROCHECKARRAY", array_budget_callback}
 	};
 	for (size_t i = 0; i < sizeof(callbacks) / sizeof(callbacks[0]); ++i)
 	{
@@ -866,6 +877,7 @@ int KeroBasicAdapter::basic_run(char* commands, void* lnbase, void*, void*)
 	{
 		Statements = 0;
 		OutputBytes = 0;
+		ArrayElements = 0;
 		Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
 	}
 	program->data_cursor = 0;
@@ -2593,6 +2605,45 @@ int KeroBasicAdapter::data_read_string_callback(struct mb_interpreter_t* interpr
 	}
 	mb_check(mb_push_string(interpreter, local,
 		mb_memdup(value.string.c_str(), static_cast<unsigned>(value.string.size() + 1))));
+	return MB_FUNC_OK;
+}
+
+int KeroBasicAdapter::array_budget_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	KeroBasicAdapter* adapter = from_interpreter(interpreter);
+	if (!adapter || !adapter->ActiveProgram) return MB_FUNC_ERR;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	size_t elements = 1;
+	size_t dimensions = 0;
+	while (mb_has_arg(interpreter, local))
+	{
+		mb_value_t value;
+		LDBLE number = 0;
+		mb_check(mb_pop_value(interpreter, local, &value));
+		if (!numeric_value(value, number) || !std::isfinite(number) ||
+			number < 1 || std::floor(number) != number ||
+			number > static_cast<LDBLE>(std::numeric_limits<size_t>::max()))
+		{
+			adapter->LastError = "DIM bounds must produce positive integer lengths";
+			return MB_FUNC_ERR;
+		}
+		const size_t length = static_cast<size_t>(number);
+		if (length > KERO_ARRAY_ELEMENT_BUDGET || elements > KERO_ARRAY_ELEMENT_BUDGET / length)
+		{
+			adapter->LastError = "array allocation budget exceeded (1000000 elements)";
+			return MB_FUNC_ERR;
+		}
+		elements *= length;
+		++dimensions;
+	}
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	if (dimensions == 0 || adapter->ArrayElements > KERO_ARRAY_ELEMENT_BUDGET - elements)
+	{
+		adapter->LastError = "array allocation budget exceeded (1000000 elements)";
+		return MB_FUNC_ERR;
+	}
+	adapter->ArrayElements += elements;
+	mb_check(mb_push_int(interpreter, local, 0));
 	return MB_FUNC_OK;
 }
 
