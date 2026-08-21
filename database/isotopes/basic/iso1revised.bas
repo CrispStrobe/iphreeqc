@@ -25,12 +25,25 @@
 96 data "T[14C]O3","T[14C]O2[18O]","T[14C]O[18O]O","T[14C]O[18O]2",
 97 data "T[14C][18O]O2","T[14C][18O]O[18O]","T[14C][18O]2O","T[14C][18O]3"
 
-120 data_line = 79
 130 for i = 1 to n1
-140   if not ((i mod 4) = 1) then goto 170
-150   data_line = data_line + 1
-155   print data_line, i
-160   restore data_line
+140   if i = 1 then restore 80
+141   if i = 5 then restore 81
+142   if i = 9 then restore 82
+143   if i = 13 then restore 83
+144   if i = 17 then restore 84
+145   if i = 21 then restore 85
+146   if i = 25 then restore 86
+147   if i = 29 then restore 87
+148   if i = 33 then restore 88
+149   if i = 37 then restore 89
+150   if i = 41 then restore 90
+151   if i = 45 then restore 91
+152   if i = 49 then restore 92
+153   if i = 53 then restore 93
+154   if i = 57 then restore 94
+155   if i = 61 then restore 95
+156   if i = 65 then restore 96
+157   if i = 69 then restore 97
 170   read ligand$(i)
 180 next i
 200 for i = 1 to n1

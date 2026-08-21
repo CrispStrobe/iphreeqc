@@ -34,16 +34,25 @@ public:
 	int Get_active_charts() {return this->active_charts;}
 	void Increment_active_charts()
 	{
+#if defined(__cplusplus_cli)
 		System::Threading::Interlocked::Increment(this->active_charts);
+#else
+		++this->active_charts;
+#endif
 	}
 	void Decrement_active_charts()
 	{
+#if defined(__cplusplus_cli)
 		System::Threading::Interlocked::Decrement(this->active_charts);
+#else
+		--this->active_charts;
+#endif
 	}
 	bool Read(Phreeqc * phreeqc_ptr, CParser &parser);
 	void Punch_user_graph(Phreeqc * phreeqc_ptr);
 	bool End_timer();
 	bool dump(std::ostream & oss, unsigned int indent);
+	std::string ToJson() const;
 protected:
 	std::map<int, ChartObject *> chart_map;
 	int current_chart_n_user;

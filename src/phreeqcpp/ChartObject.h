@@ -335,8 +335,10 @@ class ChartObject:public cxxNumKeyword
 	static CurveObject ExtractCurveInfo(std::string & str_line);
 	void Set_rate_struct(void);
 	void PlotXY(std::string x, std::string y);
-    bool start_chart(void);
+	bool start_chart(void);
+#if defined(__cplusplus_cli)
 	ZedGraph::SymbolType Return_SymbolType(std::string);
+#endif
 	void SaveCurvesToFile(std::string &);
 	void Rate_free(void);
 	void Initialize_graph_pts(void);

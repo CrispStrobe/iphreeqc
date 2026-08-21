@@ -17,5 +17,5 @@
 1010 print "Fe(HS)2 + 2" + A$(i) + "- = Fe(" + A$(i) + ")2" + " + 2HS-" 
 1020 return
 2000 REM equation for different
-2010 print "Fe(HS)2 + " + A$(i) + "- + " + A$(j) "- = Fe" + A$(i) + A$(j) + " + 2HS-" 
+2010 print "Fe(HS)2 + " + A$(i) + "- + " + A$(j) + "- = Fe" + A$(i) + A$(j) + " + 2HS-"
 2020 return

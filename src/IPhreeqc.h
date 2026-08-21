@@ -937,6 +937,9 @@ extern "C" {
  */
 	IPQ_DLL_EXPORT const char* GetSelectedOutputString(int id);
 
+/** Retrieves renderer-neutral USER_GRAPH chart data as UTF-8 JSON. */
+	IPQ_DLL_EXPORT const char* GetUserGraphJson(int id);
+
 
 /**
  *  Retrieves the given line of the current selected output string (see @ref SetCurrentSelectedOutputUserNumber).

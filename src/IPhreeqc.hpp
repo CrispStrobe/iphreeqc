@@ -389,6 +389,7 @@ public:
 	 *  @see                    GetCurrentSelectedOutputUserNumber, GetSelectedOutputStringLine, GetSelectedOutputFileOn, GetSelectedOutputStringLineCount, GetSelectedOutputStringOn, GetSelectedOutputString, SetCurrentSelectedOutputUserNumber, SetSelectedOutputFileOn, SetSelectedOutputStringOn
 	 */
 	const char*              GetSelectedOutputString(void)const;
+	const char*              GetUserGraphJson(void)const;
 
 	/**
 	 *  Retrieves the given selected output line of the currently selected user number (see @ref SetCurrentSelectedOutputUserNumber).
@@ -1000,6 +1001,7 @@ protected:
 	std::map< int, bool >                         SelectedOutputStringOn;
 	std::map< int, std::string >                  SelectedOutputStringMap;
 	std::map< int, std::vector< std::string > >   SelectedOutputLinesMap;
+	mutable std::string      UserGraphJson;
 
 protected:
 	Phreeqc* PhreeqcPtr;

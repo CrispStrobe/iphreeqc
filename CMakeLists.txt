@@ -368,6 +368,10 @@ if (MSVC AND BUILD_SHARED_LIBS AND BUILD_CLR_LIBS)
   target_compile_definitions(IPhreeqc PRIVATE "MULTICHART")
 endif()
 
+if (IPHREEQC_WITH_MY_BASIC)
+  target_compile_definitions(IPhreeqc PRIVATE "MULTICHART")
+endif()
+
 set_target_properties(IPhreeqc PROPERTIES
   VERSION "${IPhreeqc_VERSION}"
   SOVERSION "${IPhreeqc_VERSION_MAJOR}"
@@ -425,7 +429,10 @@ if (BUILD_CLR_LIBS)
     message(FATAL_ERROR "BUILD_CLR_LIBS and IPHREEQC_STATIC_RUNTIME are mutually exclusive")
   endif()
 
-  # CLR files
+endif()
+
+if (BUILD_CLR_LIBS OR IPHREEQC_WITH_MY_BASIC)
+  # Renderer-neutral chart storage is also used by the native MY-BASIC build.
   target_sources(IPhreeqc
     PRIVATE
       src/phreeqcpp/ChartHandler.cpp
@@ -435,7 +442,6 @@ if (BUILD_CLR_LIBS)
       src/phreeqcpp/CurveObject.cpp
       src/phreeqcpp/CurveObject.h
   )
-
 endif()
 
 include (CTest)

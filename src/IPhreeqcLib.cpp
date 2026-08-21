@@ -565,6 +565,18 @@ GetSelectedOutputString(int id)
 }
 
 const char*
+GetUserGraphJson(int id)
+{
+	static const char empty[] = "{\"charts\":[]}";
+	IPhreeqc* IPhreeqcPtr = IPhreeqcLib::GetInstance(id);
+	if (IPhreeqcPtr)
+	{
+		return IPhreeqcPtr->GetUserGraphJson();
+	}
+	return empty;
+}
+
+const char*
 GetSelectedOutputStringLine(int id, int n)
 {
 	static const char err_msg[] = "GetSelectedOutputStringLine: Invalid instance id.\n";

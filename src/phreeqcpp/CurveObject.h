@@ -17,6 +17,7 @@ public:
 	{
 		return this->id;
 	}
+	const std::string &Get_id(void) const { return this->id; }
 	void Set_color(std::string s)
 	{
 		this->color = s;
@@ -25,6 +26,7 @@ public:
 	{
 		return this->color;
 	}
+	const std::string &Get_color(void) const { return this->color; }
 	void Set_symbol(std::string s)
 	{
 		this->symbol = s;
@@ -33,6 +35,7 @@ public:
 	{
 		return this->symbol;
 	}
+	const std::string &Get_symbol(void) const { return this->symbol; }
 	void Set_symbol_size(LDBLE f)
 	{
 		this->symbol_size = f;
@@ -41,6 +44,7 @@ public:
 	{
 		return this->symbol_size;
 	}
+	LDBLE Get_symbol_size(void) const { return this->symbol_size; }
 	void Set_line_w(LDBLE f)
 	{
 		this->line_w = f;
@@ -49,6 +53,7 @@ public:
 	{
 		return this->line_w;
 	}
+	LDBLE Get_line_w(void) const { return this->line_w; }
 	void Set_y_axis(int f)
 	{
 		this->y_axis = f;
@@ -57,14 +62,17 @@ public:
 	{
 		return this->x;
 	}
+	const std::vector<LDBLE> & Get_x() const { return this->x; }
 	std::vector<LDBLE> & Get_y()
 	{
 		return this->y;
 	}
+	const std::vector<LDBLE> & Get_y() const { return this->y; }
 	int Get_y_axis()
 	{
 		return this->y_axis;
 	}
+	int Get_y_axis() const { return this->y_axis; }
 
 protected:
 	std::vector<LDBLE> x, y;

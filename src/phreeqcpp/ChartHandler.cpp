@@ -7,7 +7,37 @@
 #pragma warning(disable : 4786)	// disable truncation warning (Only used by debugger)
 #endif
 #include "ChartHandler.h"
+#include <algorithm>
 #include <iostream>
+#include <iomanip>
+
+namespace
+{
+void json_string(std::ostream& out, const std::string& value)
+{
+	out << '"';
+	for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
+	{
+		switch (*it)
+		{
+		case '"': out << "\\\""; break;
+		case '\\': out << "\\\\"; break;
+		case '\b': out << "\\b"; break;
+		case '\f': out << "\\f"; break;
+		case '\n': out << "\\n"; break;
+		case '\r': out << "\\r"; break;
+		case '\t': out << "\\t"; break;
+		default:
+			if (static_cast<unsigned char>(*it) < 0x20)
+				out << "\\u" << std::hex << std::setw(4) << std::setfill('0')
+					<< static_cast<unsigned>(static_cast<unsigned char>(*it))
+					<< std::dec << std::setfill(' ');
+			else out << *it;
+		}
+	}
+	out << '"';
+}
+}
 
 #if defined(PHREEQCI_GUI)
 #ifdef _DEBUG
@@ -221,5 +251,53 @@ ChartHandler::dump(std::ostream & oss, unsigned int indent)
 	}
 	return true;
 }
-#endif
 
+std::string
+ChartHandler::ToJson() const
+{
+	std::ostringstream out;
+	out << std::setprecision(17) << "{\"charts\":[";
+	bool first_chart = true;
+	for (std::map<int, ChartObject *>::const_iterator chart_it = chart_map.begin(); chart_it != chart_map.end(); ++chart_it)
+	{
+		const ChartObject* chart = chart_it->second;
+		if (!chart) continue;
+		if (!first_chart) out << ',';
+		first_chart = false;
+		out << "{\"user_number\":" << chart_it->first << ",\"title\":";
+		json_string(out, chart->Get_chart_title());
+		out << ",\"axis_titles\":[";
+		for (size_t i = 0; i < chart->Get_axis_titles().size(); ++i)
+		{
+			if (i) out << ',';
+			json_string(out, chart->Get_axis_titles()[i]);
+		}
+		out << "],\"series\":[";
+		const std::vector<CurveObject *>& curves = chart->Get_Curves();
+		for (size_t i = 0; i < curves.size(); ++i)
+		{
+			if (i) out << ',';
+			const CurveObject* curve = curves[i];
+			out << "{\"id\":";
+			json_string(out, curve->Get_id());
+			out << ",\"color\":";
+			json_string(out, curve->Get_color());
+			out << ",\"symbol\":";
+			json_string(out, curve->Get_symbol());
+			out << ",\"line_width\":" << curve->Get_line_w()
+				<< ",\"symbol_size\":" << curve->Get_symbol_size()
+				<< ",\"y_axis\":" << curve->Get_y_axis() << ",\"points\":[";
+			const size_t count = std::min(curve->Get_x().size(), curve->Get_y().size());
+			for (size_t point = 0; point < count; ++point)
+			{
+				if (point) out << ',';
+				out << '[' << curve->Get_x()[point] << ',' << curve->Get_y()[point] << ']';
+			}
+			out << "]}";
+		}
+		out << "]}";
+	}
+	out << "]}";
+	return out.str();
+}
+#endif

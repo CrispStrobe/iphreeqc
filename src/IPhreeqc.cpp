@@ -413,6 +413,18 @@ const char* IPhreeqc::GetSelectedOutputString(void)const
 	return empty;
 }
 
+const char* IPhreeqc::GetUserGraphJson(void)const
+{
+#if defined(MULTICHART)
+	this->UserGraphJson = this->PhreeqcPtr
+		? this->PhreeqcPtr->Get_chart_handler().ToJson()
+		: "{\"charts\":[]}";
+#else
+	this->UserGraphJson = "{\"charts\":[]}";
+#endif
+	return this->UserGraphJson.c_str();
+}
+
 const char* IPhreeqc::GetSelectedOutputStringLine(int n)
 {
 	static const char empty[] = "";

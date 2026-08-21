@@ -15,8 +15,10 @@
 #include <iomanip>
 #include "phqalloc.h"
 
+#if defined(__cplusplus_cli)
 #include "Form1.h"
 using namespace zdg_ui2;
+#endif
 
 #if defined(PHREEQCI_GUI)
 #ifdef _DEBUG
@@ -121,10 +123,12 @@ cxxNumKeyword(io)
 
 ChartObject::~ChartObject()
 {
+#if defined(__cplusplus_cli)
 	while (0 != System::Threading::Interlocked::CompareExchange(this->usingResource, 7, 0))
 	{
 		System::Threading::Thread::Sleep(5);
 	}
+#endif
 	this->Rate_free();
 	delete this->user_graph;
 
@@ -914,7 +918,8 @@ ChartObject::Get_color_string_csv(std::string &color)
 	}
 	return;
 }
-ZedGraph::SymbolType 
+#if defined(__cplusplus_cli)
+ZedGraph::SymbolType
 ChartObject::Return_SymbolType(const std::string sym)
 {
 	int i;
@@ -969,6 +974,7 @@ ChartObject::Return_SymbolType(const std::string sym)
 			break;
 	}
 }
+#endif
 void 
 ChartObject::SaveCurvesToFile(std::string &file_name)
 {
@@ -1051,6 +1057,7 @@ ChartObject::SaveCurvesToFile(std::string &file_name)
 bool
 ChartObject::start_chart(void)
 {
+#if defined(__cplusplus_cli)
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(true); 
 
@@ -1065,6 +1072,7 @@ ChartObject::start_chart(void)
 	ChartObj ^p = gcnew ChartObj(this);
 	t->Start(p);
 	this->form_started = true;
+#endif
 
 	//Thread::Sleep( 1 ); /* this when debugging... */
 	//_beginthread(void (Form1::ThreadForm), 0, NULL);
