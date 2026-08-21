@@ -1417,7 +1417,9 @@ int KeroBasicAdapter::str_callback(struct mb_interpreter_t* interpreter, void** 
 		formatted << std::defaultfloat << std::setprecision(6) << static_cast<double>(number);
 	}
 	std::string value = formatted.str();
-	if (number >= 0) value.insert(value.begin(), ' ');
+	// PHREEQC's BASIC STR$ reserves a leading field-separator column for
+	// both signs; negative values therefore begin with " -", not just "-".
+	value.insert(value.begin(), ' ');
 	mb_check(mb_push_string(interpreter, local,
 		mb_memdup(value.c_str(), static_cast<unsigned>(value.size() + 1))));
 	return MB_FUNC_OK;
