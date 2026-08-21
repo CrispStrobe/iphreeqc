@@ -252,6 +252,7 @@ elseif (IPHREEQC_WITH_MY_BASIC)
   target_compile_definitions(IPhreeqc PRIVATE
     IPHREEQC_WITH_MY_BASIC
     IPHREEQC_HAS_BASIC
+    MB_DOUBLE_FLOAT
     MB_DISABLE_LOAD_FILE
   )
   target_compile_features(IPhreeqc PRIVATE cxx_std_11)

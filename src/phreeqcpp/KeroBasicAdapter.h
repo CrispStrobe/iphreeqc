@@ -4,6 +4,7 @@
 #include "BasicInterpreter.h"
 #include "my_basic.h"
 
+#include <chrono>
 #include <set>
 #include <string>
 
@@ -44,6 +45,22 @@ private:
 	static int saturation_ratio_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int log_molality_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int species_delta_h_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int log10_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int log_activity_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int kinetics_moles_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int equi_phase_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int gas_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int ss_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int gfw_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int phase_formula_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int calc_value_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int sum_species_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int sum_gas_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int cell_no_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int soln_vol_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int sim_time_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int total_time_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int mid_string_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int print_callback(struct mb_interpreter_t* interpreter, const char* format, ...);
 	static int input_callback(struct mb_interpreter_t* interpreter, const char* prompt, char* buffer, int length);
 	static int import_callback(struct mb_interpreter_t* interpreter, const char* path);
@@ -64,7 +81,7 @@ private:
 		unsigned short row,
 		unsigned short column);
 
-	static std::string transform_source(const char* commands);
+	std::string transform_source(const char* commands);
 	static bool is_dispose_command(const char* commands);
 	static KeroBasicAdapter* from_interpreter(struct mb_interpreter_t* interpreter);
 	static int named_chemistry_callback(
@@ -74,12 +91,18 @@ private:
 
 	int report_error(const std::string& context);
 	int set_runtime_values(Program* program);
+	double sim_time_value() const;
+	double total_time_value() const;
 	void destroy_program(Program* program);
 
 	Phreeqc* PhreeqcPtr;
 	std::set<Program*> Programs;
 	Program* ActiveProgram;
 	std::string LastError;
+	int RecursionDepth;
+	size_t OutputBytes;
+	size_t Statements;
+	std::chrono::steady_clock::time_point Deadline;
 };
 
 #endif

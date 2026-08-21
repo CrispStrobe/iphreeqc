@@ -254,7 +254,7 @@ read_input(void)
 			read_solid_solutions();
 			break;
 		case Keywords::KEY_USER_GRAPH:
-#if !defined(IPHREEQC_HAS_BASIC)
+#if !defined(IPHREEQC_WITH_BASIC)
 			for (;;)
 			{
 				j = check_line("Reading disabled USER_GRAPH", FALSE, TRUE, TRUE, TRUE);
@@ -263,7 +263,11 @@ read_input(void)
 					break;
 				}
 			}
+#if defined(IPHREEQC_WITH_MY_BASIC)
+			error_msg("MY-BASIC compatibility: USER_GRAPH is not supported.", CONTINUE);
+#else
 			error_msg("PHREEQC BASIC capability is disabled; USER_GRAPH cannot execute.", CONTINUE);
+#endif
 #else
 #if defined PHREEQ98 
 			read_user_graph();
