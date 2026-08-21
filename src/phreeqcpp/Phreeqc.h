@@ -69,6 +69,7 @@ class cxxSS;
 class cxxStorageBin;
 class PBasic;
 class BasicInterpreter;
+class KeroBasicAdapter;
 
 #include "global_structures.h"
 
@@ -1841,6 +1842,7 @@ protected:
 	std::map<std::string, std::vector < std::string> > sum_species_map_db;
 
 	friend class PBasic;
+	friend class KeroBasicAdapter;
 	friend class ChartObject;
 	friend class IPhreeqc;
 	friend class TestIPhreeqc;

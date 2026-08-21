@@ -46,6 +46,11 @@ endif()
 # Fortran
 option (IPHREEQC_ENABLE_MODULE "Enable Fortran module" ON)
 option (IPHREEQC_WITH_BASIC "Build the legacy PHREEQC BASIC interpreter" ON)
+option (IPHREEQC_WITH_MY_BASIC "Build the preview MY-BASIC replacement interpreter" OFF)
+set (KEROTAKIS_MY_BASIC_DIR "" CACHE PATH "Directory containing pinned my_basic.c and my_basic.h")
+if (IPHREEQC_WITH_BASIC AND IPHREEQC_WITH_MY_BASIC)
+  message(FATAL_ERROR "IPHREEQC_WITH_BASIC and IPHREEQC_WITH_MY_BASIC are mutually exclusive")
+endif()
 if (STANDALONE_BUILD)
   if (IPHREEQC_FORTRAN_TESTING)
     enable_language(Fortran)
@@ -231,7 +236,25 @@ if (IPHREEQC_WITH_BASIC)
     src/phreeqcpp/PBasic.cpp
     src/phreeqcpp/PBasic.h
   )
-  target_compile_definitions(IPhreeqc PRIVATE IPHREEQC_WITH_BASIC)
+  target_compile_definitions(IPhreeqc PRIVATE IPHREEQC_WITH_BASIC IPHREEQC_HAS_BASIC)
+elseif (IPHREEQC_WITH_MY_BASIC)
+  if (NOT EXISTS "${KEROTAKIS_MY_BASIC_DIR}/my_basic.c" OR
+      NOT EXISTS "${KEROTAKIS_MY_BASIC_DIR}/my_basic.h")
+    message(FATAL_ERROR "KEROTAKIS_MY_BASIC_DIR must contain the pinned MY-BASIC core")
+  endif()
+  target_sources(IPhreeqc PRIVATE
+    src/phreeqcpp/KeroBasicAdapter.cpp
+    src/phreeqcpp/KeroBasicAdapter.h
+    ${KEROTAKIS_MY_BASIC_DIR}/my_basic.c
+    ${KEROTAKIS_MY_BASIC_DIR}/my_basic.h
+  )
+  target_include_directories(IPhreeqc PRIVATE ${KEROTAKIS_MY_BASIC_DIR})
+  target_compile_definitions(IPhreeqc PRIVATE
+    IPHREEQC_WITH_MY_BASIC
+    IPHREEQC_HAS_BASIC
+    MB_DISABLE_LOAD_FILE
+  )
+  target_compile_features(IPhreeqc PRIVATE cxx_std_11)
 else()
   target_sources(IPhreeqc PRIVATE
     src/phreeqcpp/DisabledBasic.cpp

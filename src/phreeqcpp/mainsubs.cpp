@@ -5,6 +5,8 @@
 #include "phqalloc.h"
 #if defined(IPHREEQC_WITH_BASIC)
 #include "PBasic.h"
+#elif defined(IPHREEQC_WITH_MY_BASIC)
+#include "KeroBasicAdapter.h"
 #else
 #include "DisabledBasic.h"
 #endif
@@ -68,6 +70,8 @@ initialize(void)
 	}
 #if defined(IPHREEQC_WITH_BASIC)
 	basic_interpreter = new PBasic(this, phrq_io);
+#elif defined(IPHREEQC_WITH_MY_BASIC)
+	basic_interpreter = new KeroBasicAdapter(this);
 #else
 	basic_interpreter = new DisabledBasic(this);
 #endif

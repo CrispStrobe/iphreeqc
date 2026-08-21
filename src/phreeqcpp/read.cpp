@@ -225,7 +225,7 @@ read_input(void)
 			break;
 		case Keywords::KEY_KINETICS:
 			read_kinetics();
-#if !defined(IPHREEQC_WITH_BASIC)
+#if !defined(IPHREEQC_HAS_BASIC)
 			error_msg("PHREEQC BASIC capability is disabled; KINETICS rate programs cannot execute.", CONTINUE);
 #endif
 			break;
@@ -240,13 +240,13 @@ read_input(void)
 			break;
 		case Keywords::KEY_USER_PRINT:
 			read_user_print();
-#if !defined(IPHREEQC_WITH_BASIC)
+#if !defined(IPHREEQC_HAS_BASIC)
 			error_msg("PHREEQC BASIC capability is disabled; USER_PRINT cannot execute.", CONTINUE);
 #endif
 			break;
 		case Keywords::KEY_USER_PUNCH:
 			read_user_punch();
-#if !defined(IPHREEQC_WITH_BASIC)
+#if !defined(IPHREEQC_HAS_BASIC)
 			error_msg("PHREEQC BASIC capability is disabled; USER_PUNCH cannot execute.", CONTINUE);
 #endif
 			break;
@@ -254,7 +254,7 @@ read_input(void)
 			read_solid_solutions();
 			break;
 		case Keywords::KEY_USER_GRAPH:
-#if !defined(IPHREEQC_WITH_BASIC)
+#if !defined(IPHREEQC_HAS_BASIC)
 			for (;;)
 			{
 				j = check_line("Reading disabled USER_GRAPH", FALSE, TRUE, TRUE, TRUE);
