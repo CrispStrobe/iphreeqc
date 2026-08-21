@@ -56,6 +56,13 @@ private:
 		unsigned short row,
 		unsigned short column,
 		int abort_code);
+	static int step_callback(
+		struct mb_interpreter_t* interpreter,
+		void** local,
+		const char* file,
+		int position,
+		unsigned short row,
+		unsigned short column);
 
 	static std::string transform_source(const char* commands);
 	static bool is_dispose_command(const char* commands);
@@ -71,6 +78,7 @@ private:
 
 	Phreeqc* PhreeqcPtr;
 	std::set<Program*> Programs;
+	Program* ActiveProgram;
 	std::string LastError;
 };
 

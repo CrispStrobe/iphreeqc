@@ -2,6 +2,7 @@
 #include "Phreeqc.h"
 
 #include <cctype>
+#include <chrono>
 #include <cstdarg>
 #include <cstdio>
 #include <mutex>
@@ -137,12 +138,14 @@ std::string transform_statement(const std::string& statement)
 
 struct KeroBasicAdapter::Program
 {
-	Program() : interpreter(NULL) {}
+	Program() : interpreter(NULL), statements(0) {}
 	struct mb_interpreter_t* interpreter;
+	size_t statements;
+	std::chrono::steady_clock::time_point deadline;
 };
 
 KeroBasicAdapter::KeroBasicAdapter(Phreeqc* phreeqc)
-	: PhreeqcPtr(phreeqc)
+	: PhreeqcPtr(phreeqc), ActiveProgram(NULL)
 {
 	std::lock_guard<std::mutex> lock(my_basic_mutex());
 	if (!my_basic_initialized())
@@ -191,6 +194,7 @@ int KeroBasicAdapter::basic_compile(const char* commands, void** lnbase, void** 
 	mb_set_inputer(program->interpreter, input_callback);
 	mb_set_import_handler(program->interpreter, import_callback);
 	mb_set_error_handler(program->interpreter, error_callback);
+	mb_debug_set_stepped_handler(program->interpreter, step_callback, NULL);
 	if (mb_register_func(program->interpreter, "KEROSAVE", save_callback) == 0)
 	{
 		destroy_program(program);
@@ -258,7 +262,11 @@ int KeroBasicAdapter::basic_run(char* commands, void* lnbase, void*, void*)
 	}
 	if (set_runtime_values(program) != 0) return report_error("runtime variables");
 
+	program->statements = 0;
+	program->deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+	ActiveProgram = program;
 	int result = mb_run(program->interpreter, false);
+	ActiveProgram = NULL;
 	if (result != MB_FUNC_OK)
 	{
 		return report_error(result == MB_FUNC_SUSPEND ? "execution suspended" : "run");
@@ -429,6 +437,32 @@ void KeroBasicAdapter::error_callback(
 	std::ostringstream message;
 	message << (description ? description : "MY-BASIC error") << " at " << row << ':' << column;
 	adapter->LastError = message.str();
+}
+
+int KeroBasicAdapter::step_callback(
+	struct mb_interpreter_t* interpreter,
+	void**,
+	const char*,
+	int,
+	unsigned short,
+	unsigned short)
+{
+	KeroBasicAdapter* adapter = from_interpreter(interpreter);
+	if (!adapter || !adapter->ActiveProgram) return MB_FUNC_ERR;
+	Program* program = adapter->ActiveProgram;
+	++program->statements;
+	if (program->statements > 100000)
+	{
+		adapter->LastError = "statement budget exceeded";
+		return MB_FUNC_ERR;
+	}
+	if ((program->statements & 255) == 0 &&
+		std::chrono::steady_clock::now() > program->deadline)
+	{
+		adapter->LastError = "wall-clock budget exceeded";
+		return MB_FUNC_ERR;
+	}
+	return MB_FUNC_OK;
 }
 
 std::string KeroBasicAdapter::transform_source(const char* commands)
