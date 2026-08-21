@@ -3,7 +3,7 @@
 
 #include "Utils.h"
 #include "NameDouble.h"
-#include "PBasic.h"
+#include "BasicInterpreter.h"
 #include "Exchange.h"
 #include "GasPhase.h"
 #include "PPassemblage.h"
@@ -1616,10 +1616,9 @@ get_calculate_value(const char* name)
 	}
 
 	char l_command[] = "run";
-	PBasic interp(this, this->phrq_io);
 	if (calculate_value_ptr->new_def == TRUE)
 	{
-		if (interp.basic_compile
+		if (basic_compile
 		(calculate_value_ptr->commands.c_str(),
 			&calculate_value_ptr->linebase,
 			&calculate_value_ptr->varbase,
@@ -1633,7 +1632,7 @@ get_calculate_value(const char* name)
 		calculate_value_ptr->new_def = FALSE;
 	}
 
-	if (interp.basic_run(l_command,
+	if (basic_run(l_command,
 		calculate_value_ptr->linebase,
 		calculate_value_ptr->varbase,
 		calculate_value_ptr->loopbase) != 0)

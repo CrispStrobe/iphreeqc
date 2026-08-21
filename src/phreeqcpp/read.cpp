@@ -225,6 +225,9 @@ read_input(void)
 			break;
 		case Keywords::KEY_KINETICS:
 			read_kinetics();
+#if !defined(IPHREEQC_WITH_BASIC)
+			error_msg("PHREEQC BASIC capability is disabled; KINETICS rate programs cannot execute.", CONTINUE);
+#endif
 			break;
 		case Keywords::KEY_INCREMENTAL_REACTIONS:
 			read_incremental_reactions();
@@ -237,14 +240,31 @@ read_input(void)
 			break;
 		case Keywords::KEY_USER_PRINT:
 			read_user_print();
+#if !defined(IPHREEQC_WITH_BASIC)
+			error_msg("PHREEQC BASIC capability is disabled; USER_PRINT cannot execute.", CONTINUE);
+#endif
 			break;
 		case Keywords::KEY_USER_PUNCH:
 			read_user_punch();
+#if !defined(IPHREEQC_WITH_BASIC)
+			error_msg("PHREEQC BASIC capability is disabled; USER_PUNCH cannot execute.", CONTINUE);
+#endif
 			break;
 		case Keywords::KEY_SOLID_SOLUTIONS:
 			read_solid_solutions();
 			break;
 		case Keywords::KEY_USER_GRAPH:
+#if !defined(IPHREEQC_WITH_BASIC)
+			for (;;)
+			{
+				j = check_line("Reading disabled USER_GRAPH", FALSE, TRUE, TRUE, TRUE);
+				if (j == EOF || j == KEYWORD)
+				{
+					break;
+				}
+			}
+			error_msg("PHREEQC BASIC capability is disabled; USER_GRAPH cannot execute.", CONTINUE);
+#else
 #if defined PHREEQ98 
 			read_user_graph();
 #elif defined MULTICHART
@@ -258,6 +278,7 @@ read_input(void)
 					break;
 				}
 			}
+#endif
 #endif
 			break;
 		case Keywords::KEY_LLNL_AQUEOUS_MODEL_PARAMETERS:

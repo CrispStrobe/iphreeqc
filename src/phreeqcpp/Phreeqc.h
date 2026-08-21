@@ -68,6 +68,7 @@ class cxxSSassemblage;
 class cxxSS;
 class cxxStorageBin;
 class PBasic;
+class BasicInterpreter;
 
 #include "global_structures.h"
 
@@ -1659,7 +1660,7 @@ protected:
 	PHRQMemHeader* s_pTail;
 
 	/* Basic */
-	PBasic* basic_interpreter;
+	BasicInterpreter* basic_interpreter;
 
 	double (*basic_callback_ptr) (double x1, double x2, const char* str, void* cookie);
 	void* basic_callback_cookie;

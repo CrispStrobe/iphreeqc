@@ -3,7 +3,11 @@
 #include "Utils.h"
 #include "Phreeqc.h"
 #include "phqalloc.h"
+#if defined(IPHREEQC_WITH_BASIC)
 #include "PBasic.h"
+#else
+#include "DisabledBasic.h"
+#endif
 #include "Temperature.h"
 #include "Exchange.h"
 #include "GasPhase.h"
@@ -62,7 +66,11 @@ initialize(void)
 	{
 		basic_free();
 	}
+#if defined(IPHREEQC_WITH_BASIC)
 	basic_interpreter = new PBasic(this, phrq_io);
+#else
+	basic_interpreter = new DisabledBasic(this);
+#endif
 	// allocate one change_surf
 	change_surf =
 		(struct Change_Surf *)

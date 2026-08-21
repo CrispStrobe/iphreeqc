@@ -647,6 +647,23 @@ GetSelectedOutputValue2(int id, int row, int col, int *vtype, double* dvalue, ch
 	return IPQ_BADINSTANCE;
 }
 
+IPQ_RESULT
+GetSpeciesDeltaH(int id, const char* name, double* delta_h)
+{
+	IPhreeqc* IPhreeqcPtr = IPhreeqcLib::GetInstance(id);
+	if (IPhreeqcPtr)
+	{
+		switch (IPhreeqcPtr->GetSpeciesDeltaH(name, delta_h))
+		{
+		case VR_OK:         return IPQ_OK;
+		case VR_INVALIDARG: return IPQ_INVALIDARG;
+		default:
+			assert(false);
+		}
+	}
+	return IPQ_BADINSTANCE;
+}
+
 const char*
 GetVersionString(void)
 {

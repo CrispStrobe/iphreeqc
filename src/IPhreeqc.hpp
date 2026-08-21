@@ -417,6 +417,17 @@ public:
 	bool                     GetSelectedOutputStringOn(void)const;
 
 	/**
+	 *  Calculates the reaction enthalpy for a named aqueous species using
+	 *  PHREEQC's native thermodynamic implementation and current state.
+	 *  @param name           Species name as it appears in the loaded database.
+	 *  @param delta_h        Receives the enthalpy in kJ/mol.
+	 *  @retval VR_OK         Success.
+	 *  @retval VR_INVALIDARG No database is loaded, an argument is null, or
+	 *                        the species is not present in the database.
+	 */
+	VRESULT                  GetSpeciesDeltaH(const char* name, double* delta_h);
+
+	/**
 	 *  Returns the @c VAR associated with the specified row and column.  The current <b>SELECTED_OUTPUT</b> block is set using the @ref SetCurrentSelectedOutputUserNumber method.
 	 *  @param row              The row index.
 	 *  @param col              The column index.

@@ -1363,6 +1363,20 @@ Headings
 
 
 /**
+ *  Calculates the reaction enthalpy for a named aqueous species using the
+ *  loaded database and PHREEQC's current temperature and pressure state.
+ *  @param id            The instance id returned from @ref CreateIPhreeqc.
+ *  @param name          Species name as it appears in the loaded database.
+ *  @param delta_h       Receives the enthalpy in kJ/mol.
+ *  @retval IPQ_OK       Success.
+ *  @retval IPQ_INVALIDARG An argument is null, no database is loaded, or the
+ *                         species is not present in the database.
+ *  @retval IPQ_BADINSTANCE The given id is invalid.
+ */
+	IPQ_DLL_EXPORT IPQ_RESULT  GetSpeciesDeltaH(int id, const char* name, double* delta_h);
+
+
+/**
  *  Retrieves the string buffer containing the version in the form of X.X.X-XXXX.
  *  @return              A null terminated string containing the IPhreeqc version number.
  *  @par Fortran90 Interface:

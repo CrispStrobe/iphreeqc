@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include "phrqtype.h"
 #include "PHRQ_base.h"
+#include "BasicInterpreter.h"
 #include "global_structures.h"
 class Phreeqc;
 
@@ -131,7 +132,7 @@ struct LOC_exec
 	tokenrec *t;
 };
 
-class PBasic: public PHRQ_base
+class PBasic: public PHRQ_base, public BasicInterpreter
 {
 public:
 	PBasic(Phreeqc *ptr, PHRQ_io *phrq_io=NULL);

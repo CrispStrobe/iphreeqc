@@ -45,6 +45,7 @@ endif()
 
 # Fortran
 option (IPHREEQC_ENABLE_MODULE "Enable Fortran module" ON)
+option (IPHREEQC_WITH_BASIC "Build the legacy PHREEQC BASIC interpreter" ON)
 if (STANDALONE_BUILD)
   if (IPHREEQC_FORTRAN_TESTING)
     enable_language(Fortran)
@@ -149,8 +150,7 @@ target_sources(IPhreeqc
     src/phreeqcpp/nvector_serial.cpp
     src/phreeqcpp/nvector_serial.h
     src/phreeqcpp/parse.cpp
-    src/phreeqcpp/PBasic.cpp
-    src/phreeqcpp/PBasic.h
+    src/phreeqcpp/BasicInterpreter.h
     src/phreeqcpp/phqalloc.cpp
     src/phreeqcpp/phqalloc.h
     src/phreeqcpp/Phreeqc.cpp
@@ -225,6 +225,19 @@ target_sources(IPhreeqc
     src/Var.h
     src/Version.h
 )
+
+if (IPHREEQC_WITH_BASIC)
+  target_sources(IPhreeqc PRIVATE
+    src/phreeqcpp/PBasic.cpp
+    src/phreeqcpp/PBasic.h
+  )
+  target_compile_definitions(IPhreeqc PRIVATE IPHREEQC_WITH_BASIC)
+else()
+  target_sources(IPhreeqc PRIVATE
+    src/phreeqcpp/DisabledBasic.cpp
+    src/phreeqcpp/DisabledBasic.h
+  )
+endif()
 
 target_include_directories(IPhreeqc
   PUBLIC

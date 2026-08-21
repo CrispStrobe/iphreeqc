@@ -1,5 +1,6 @@
 #include <memory>                       // auto_ptr
 #include <map>
+#include <cmath>
 #include <string.h>
 #include "IPhreeqc.hpp"                 // IPhreeqc
 #include "Phreeqc.h"                    // Phreeqc
@@ -437,6 +438,26 @@ int IPhreeqc::GetSelectedOutputStringLineCount(void)const
 bool IPhreeqc::GetSelectedOutputStringOn(void)const
 {
 	return this->get_sel_out_string_on(this->CurrentSelectedOutputUserNumber);
+}
+
+VRESULT IPhreeqc::GetSpeciesDeltaH(const char* name, double* delta_h)
+{
+	if (!this->DatabaseLoaded || !name || !name[0] || !delta_h)
+	{
+		return VR_INVALIDARG;
+	}
+	if (!this->PhreeqcPtr->s_search(name))
+	{
+		return VR_INVALIDARG;
+	}
+
+	double value = this->PhreeqcPtr->calc_deltah_s(name);
+	if (!std::isfinite(value))
+	{
+		return VR_INVALIDARG;
+	}
+	*delta_h = value;
+	return VR_OK;
 }
 
 VRESULT IPhreeqc::GetSelectedOutputValue(int row, int col, VAR* pVAR)
