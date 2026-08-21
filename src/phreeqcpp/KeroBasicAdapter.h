@@ -75,6 +75,7 @@ private:
 	static int eol_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int eol_notab_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int no_newline_callback(struct mb_interpreter_t* interpreter, void** local);
+	static int str_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int str_e_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int str_f_callback(struct mb_interpreter_t* interpreter, void** local);
 	static int pad_callback(struct mb_interpreter_t* interpreter, void** local);

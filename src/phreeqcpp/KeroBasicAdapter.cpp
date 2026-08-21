@@ -17,6 +17,7 @@
 #include <cstring>
 #include <iomanip>
 #include <limits>
+#include <locale>
 #include <map>
 #include <mutex>
 #include <sstream>
@@ -235,7 +236,7 @@ std::string translate_identifiers(const std::string& statement)
 				{"GET$", "KEROGETSTRING"},
 				{"GET", "KEROGET"},
 				{"EXISTS", "KEROEXISTS"},
-				{"STR$", "STR"},
+				{"STR$", "KEROSTR"},
 				{"CHR$", "CHR"},
 				{"EOL$", "KEROEOL()"},
 				{"TRIM", "KEROTRIM"},
@@ -712,6 +713,7 @@ int KeroBasicAdapter::basic_compile(const char* commands, void** lnbase, void** 
 		{"KEROEOL", eol_callback},
 		{"KEROEOLNOTAB", eol_notab_callback},
 		{"KERONONEWLINE", no_newline_callback},
+		{"KEROSTR", str_callback},
 		{"KEROSTRE", str_e_callback},
 		{"KEROSTRF", str_f_callback},
 		{"PAD", pad_callback},
@@ -1391,6 +1393,31 @@ int KeroBasicAdapter::no_newline_callback(struct mb_interpreter_t* interpreter, 
 	mb_check(mb_attempt_close_bracket(interpreter, local));
 	mb_check(mb_push_string(interpreter, local,
 		mb_memdup(KERO_NO_NEWLINE_MARKER, static_cast<unsigned>(sizeof(KERO_NO_NEWLINE_MARKER)))));
+	return MB_FUNC_OK;
+}
+
+int KeroBasicAdapter::str_callback(struct mb_interpreter_t* interpreter, void** local)
+{
+	mb_value_t number_value;
+	LDBLE number = 0;
+	mb_check(mb_attempt_open_bracket(interpreter, local));
+	mb_check(mb_pop_value(interpreter, local, &number_value));
+	mb_check(mb_attempt_close_bracket(interpreter, local));
+	if (!numeric_value(number_value, number)) return MB_FUNC_ERR;
+	std::ostringstream formatted;
+	formatted.imbue(std::locale::classic());
+	if (number_value.type == MB_DT_INT)
+	{
+		formatted << number_value.value.integer;
+	}
+	else
+	{
+		formatted << std::defaultfloat << std::setprecision(6) << static_cast<double>(number);
+	}
+	std::string value = formatted.str();
+	if (number >= 0) value.insert(value.begin(), ' ');
+	mb_check(mb_push_string(interpreter, local,
+		mb_memdup(value.c_str(), static_cast<unsigned>(value.size() + 1))));
 	return MB_FUNC_OK;
 }
 
