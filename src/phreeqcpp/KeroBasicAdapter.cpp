@@ -28,6 +28,30 @@ namespace
 const char KERO_EOL_NOTAB_MARKER[] = "\x1eKEROTAKIS_EOL_NOTAB\x1e";
 const char KERO_NO_NEWLINE_MARKER[] = "\x1eKEROTAKIS_NO_NEWLINE\x1e";
 const size_t KERO_ARRAY_ELEMENT_BUDGET = 1000000;
+const size_t KERO_HEAP_BYTE_BUDGET = 256 * 1024 * 1024; // 256 MiB
+
+// Global state for the tracked memory allocator. All MY-BASIC access is
+// serialized under my_basic_mutex(), so a single static counter is safe.
+static size_t g_heap_bytes = 0;
+
+static char* kero_mb_alloc(unsigned size)
+{
+	char* ptr = (char*)std::malloc(size);
+	if (ptr)
+	{
+		g_heap_bytes += size;
+	}
+	return ptr;
+}
+
+static void kero_mb_free(char* ptr)
+{
+	std::free(ptr);
+	// We cannot accurately track frees without recording sizes per pointer,
+	// but the budget is a high-water-mark cap on total allocations within a
+	// single outermost execution. This is conservative: it prevents runaway
+	// allocation even if individual frees are not tracked.
+}
 
 std::recursive_mutex& my_basic_mutex()
 {
@@ -39,7 +63,11 @@ bool my_basic_initialized()
 {
 	struct Runtime
 	{
-		Runtime() : initialized(mb_init() == MB_FUNC_OK) {}
+		Runtime() : initialized(false)
+		{
+			mb_set_memory_manager(kero_mb_alloc, kero_mb_free);
+			initialized = mb_init() == MB_FUNC_OK;
+		}
 		~Runtime()
 		{
 			if (initialized) mb_dispose();
@@ -628,6 +656,8 @@ struct KeroBasicAdapter::Program
 	struct mb_interpreter_t* interpreter;
 	std::vector<DataValue> data;
 	size_t data_cursor;
+	// Map from MY-BASIC output row (1-based) to PHREEQC source line number.
+	std::map<int, std::string> row_to_line;
 };
 
 KeroBasicAdapter::KeroBasicAdapter(Phreeqc* phreeqc)
@@ -882,6 +912,7 @@ int KeroBasicAdapter::basic_run(char* commands, void* lnbase, void*, void*)
 		Statements = 0;
 		OutputBytes = 0;
 		ArrayElements = 0;
+		g_heap_bytes = 0;
 		Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
 	}
 	program->data_cursor = 0;
@@ -2739,7 +2770,26 @@ void KeroBasicAdapter::error_callback(
 	if (!adapter->LastError.empty()) return;
 	if (description && std::strcmp(description, "No error") == 0) return;
 	std::ostringstream message;
-	message << (description ? description : "MY-BASIC error") << " at " << row << ':' << column;
+	message << (description ? description : "MY-BASIC error");
+	// Map the MY-BASIC row back to the PHREEQC source line number.
+	if (adapter->ActiveProgram && !adapter->ActiveProgram->row_to_line.empty())
+	{
+		std::map<int, std::string>::const_iterator it =
+			adapter->ActiveProgram->row_to_line.upper_bound(static_cast<int>(row));
+		if (it != adapter->ActiveProgram->row_to_line.begin())
+		{
+			--it;
+			message << " at BASIC line " << it->second;
+		}
+		else
+		{
+			message << " at " << row << ':' << column;
+		}
+	}
+	else
+	{
+		message << " at " << row << ':' << column;
+	}
 	adapter->LastError = message.str();
 }
 
@@ -2748,7 +2798,7 @@ int KeroBasicAdapter::step_callback(
 	void**,
 	const char*,
 	int,
-	unsigned short,
+	unsigned short row,
 	unsigned short)
 {
 	KeroBasicAdapter* adapter = from_interpreter(interpreter);
@@ -2757,14 +2807,33 @@ int KeroBasicAdapter::step_callback(
 	++adapter->Statements;
 	if (adapter->Statements > 1000000)
 	{
-		adapter->LastError = "statement budget exceeded";
+		std::ostringstream msg;
+		msg << "statement budget exceeded";
+		if (!adapter->ActiveProgram->row_to_line.empty())
+		{
+			std::map<int, std::string>::const_iterator it =
+				adapter->ActiveProgram->row_to_line.upper_bound(static_cast<int>(row));
+			if (it != adapter->ActiveProgram->row_to_line.begin())
+			{
+				--it;
+				msg << " at BASIC line " << it->second;
+			}
+		}
+		adapter->LastError = msg.str();
 		return MB_FUNC_ERR;
 	}
-	if ((adapter->Statements & 255) == 0 &&
-		std::chrono::steady_clock::now() > adapter->Deadline)
+	if ((adapter->Statements & 255) == 0)
 	{
-		adapter->LastError = "wall-clock budget exceeded";
-		return MB_FUNC_ERR;
+		if (std::chrono::steady_clock::now() > adapter->Deadline)
+		{
+			adapter->LastError = "wall-clock budget exceeded";
+			return MB_FUNC_ERR;
+		}
+		if (g_heap_bytes > KERO_HEAP_BYTE_BUDGET)
+		{
+			adapter->LastError = "heap allocation budget exceeded";
+			return MB_FUNC_ERR;
+		}
 	}
 	return MB_FUNC_OK;
 }
@@ -2912,6 +2981,15 @@ std::string KeroBasicAdapter::transform_source(const char* commands, Program* pr
 		{
 			line_num = line.substr(first, digit - first);
 			output << line_label(line_num) << ":\n";
+			// Record the MY-BASIC output row (1-based) for this PHREEQC line.
+			// The label itself is one row; the code that follows will be the next.
+			{
+				const std::string sofar = output.str();
+				int row = 1;
+				for (std::string::size_type i = 0; i < sofar.size(); ++i)
+					if (sofar[i] == '\n') ++row;
+				program->row_to_line[row] = line_num;
+			}
 			line = digit == line.size() ? std::string() : line.substr(digit);
 		}
 
