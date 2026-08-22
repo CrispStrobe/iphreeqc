@@ -3076,6 +3076,14 @@ std::string KeroBasicAdapter::transform_source(const char* commands, Program* pr
 				output << "REM DATA\n";
 				continue;
 			}
+			if (starts_with_word(body, "ERASE"))
+			{
+				// PHREEQC BASIC ERASE clears arrays. MY-BASIC arrays are
+				// per-execution and cleaned up on program disposal, so
+				// ERASE is accepted but has no runtime effect.
+				output << "REM ERASE (no-op: arrays are per-execution)\n";
+				continue;
+			}
 			if (starts_with_word(body, "RESTORE"))
 			{
 				// Handled below together with RESTORE following THEN/ELSE.
