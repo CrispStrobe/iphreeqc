@@ -256,7 +256,7 @@ read_input(void)
 		case Keywords::KEY_USER_GRAPH:
 #if defined(IPHREEQC_WITH_MY_BASIC) && defined(MULTICHART)
 			read_user_graph_handler();
-#elif !defined(IPHREEQC_WITH_BASIC)
+#else
 			for (;;)
 			{
 				j = check_line("Reading disabled USER_GRAPH", FALSE, TRUE, TRUE, TRUE);
@@ -266,21 +266,6 @@ read_input(void)
 				}
 			}
 			error_msg("PHREEQC BASIC capability is disabled; USER_GRAPH cannot execute.", CONTINUE);
-#else
-#if defined PHREEQ98 
-			read_user_graph();
-#elif defined MULTICHART
-			read_user_graph_handler();
-# else
-			for (;;)
-			{
-				j = check_line("Reading user_graph", FALSE, TRUE, TRUE, TRUE);
-				if (j == EOF || j == KEYWORD)
-				{
-					break;
-				}
-			}
-#endif
 #endif
 			break;
 		case Keywords::KEY_LLNL_AQUEOUS_MODEL_PARAMETERS:

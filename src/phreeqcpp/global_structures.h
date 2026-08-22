@@ -715,7 +715,7 @@ public:
 		dw = 0;		// tracer diffusion coefficient in water at 25oC, m2/s
 		dw_t = 0;	// correct Dw for temperature: Dw(TK) = Dw(298.15) * exp(dw_t / TK - dw_t / 298.15)
 		// parms for calc'ng SC = SC0 * exp(-dw_a * z * mu^0.5 / (1 + DH_B * dw_a2 * mu^0.5) / (1 + mu^dw_a3))
-		// with DHO: ka = DH_B * dw_a * (1 + DD(V_apparent)^dw_a2 * sqrt_mu, dw_a3 is a switch, see calc_SC in PBasic
+		// with DHO: ka = DH_B * dw_a * (1 + DD(V_apparent)^dw_a2 * sqrt_mu, dw_a3 is a switch, see calc_SC in basicsubs
 		dw_a = 0;
 		dw_a2 = 0;
 		dw_a3 = 0;

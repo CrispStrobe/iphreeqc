@@ -53,8 +53,8 @@ am__phreeqc_SOURCES_DIST = class_main.cpp cxxKinetics.cxx \
 	GasComp.h GasPhase.cxx GasPhase.h ISolution.cxx ISolution.h \
 	ISolutionComp.cxx ISolutionComp.h Keywords.cpp Keywords.h \
 	KineticsComp.cxx KineticsComp.h NameDouble.cxx NameDouble.h \
-	NumKeyword.cxx NumKeyword.h Parser.cxx Parser.h PBasic.cpp \
-	PBasic.h Phreeqc.cpp Phreeqc.h PHRQ_base.cxx PHRQ_base.h \
+	NumKeyword.cxx NumKeyword.h Parser.cxx Parser.h \
+	Phreeqc.cpp Phreeqc.h PHRQ_base.cxx PHRQ_base.h \
 	PHRQ_io.cpp PHRQ_io.h PPassemblage.cxx PPassemblage.h \
 	PPassemblageComp.cxx PPassemblageComp.h Pressure.cxx \
 	Pressure.h Reaction.cxx Reaction.h ReadClass.cxx runner.cpp \
@@ -82,7 +82,7 @@ am_phreeqc_OBJECTS = class_main.$(OBJEXT) cxxKinetics.$(OBJEXT) \
 	ExchComp.$(OBJEXT) GasComp.$(OBJEXT) GasPhase.$(OBJEXT) \
 	ISolution.$(OBJEXT) ISolutionComp.$(OBJEXT) Keywords.$(OBJEXT) \
 	KineticsComp.$(OBJEXT) NameDouble.$(OBJEXT) \
-	NumKeyword.$(OBJEXT) Parser.$(OBJEXT) PBasic.$(OBJEXT) \
+	NumKeyword.$(OBJEXT) Parser.$(OBJEXT) \
 	Phreeqc.$(OBJEXT) PHRQ_base.$(OBJEXT) PHRQ_io.$(OBJEXT) \
 	PPassemblage.$(OBJEXT) PPassemblageComp.$(OBJEXT) \
 	Pressure.$(OBJEXT) Reaction.$(OBJEXT) ReadClass.$(OBJEXT) \
@@ -223,8 +223,8 @@ phreeqc_SOURCES = class_main.cpp cxxKinetics.cxx cxxKinetics.h \
 	GasPhase.cxx GasPhase.h ISolution.cxx ISolution.h \
 	ISolutionComp.cxx ISolutionComp.h Keywords.cpp Keywords.h \
 	KineticsComp.cxx KineticsComp.h NameDouble.cxx NameDouble.h \
-	NumKeyword.cxx NumKeyword.h Parser.cxx Parser.h PBasic.cpp \
-	PBasic.h Phreeqc.cpp Phreeqc.h PHRQ_base.cxx PHRQ_base.h \
+	NumKeyword.cxx NumKeyword.h Parser.cxx Parser.h \
+	Phreeqc.cpp Phreeqc.h PHRQ_base.cxx PHRQ_base.h \
 	PHRQ_io.cpp PHRQ_io.h PPassemblage.cxx PPassemblage.h \
 	PPassemblageComp.cxx PPassemblageComp.h Pressure.cxx \
 	Pressure.h Reaction.cxx Reaction.h ReadClass.cxx runner.cpp \
@@ -338,7 +338,6 @@ include ./$(DEPDIR)/Keywords.Po
 include ./$(DEPDIR)/KineticsComp.Po
 include ./$(DEPDIR)/NameDouble.Po
 include ./$(DEPDIR)/NumKeyword.Po
-include ./$(DEPDIR)/PBasic.Po
 include ./$(DEPDIR)/PHRQ_base.Po
 include ./$(DEPDIR)/PHRQ_io.Po
 include ./$(DEPDIR)/PHRQ_io_output.Po

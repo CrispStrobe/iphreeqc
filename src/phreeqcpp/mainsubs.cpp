@@ -3,9 +3,7 @@
 #include "Utils.h"
 #include "Phreeqc.h"
 #include "phqalloc.h"
-#if defined(IPHREEQC_WITH_BASIC)
-#include "PBasic.h"
-#elif defined(IPHREEQC_WITH_MY_BASIC)
+#if defined(IPHREEQC_WITH_MY_BASIC)
 #include "KeroBasicAdapter.h"
 #else
 #include "DisabledBasic.h"
@@ -63,14 +61,11 @@ initialize(void)
 	   Initialize llnl aqueous model parameters
 	 */
 	a_llnl = b_llnl = 0.0;
-    // new PBasic
 	if (basic_interpreter != NULL)
 	{
 		basic_free();
 	}
-#if defined(IPHREEQC_WITH_BASIC)
-	basic_interpreter = new PBasic(this, phrq_io);
-#elif defined(IPHREEQC_WITH_MY_BASIC)
+#if defined(IPHREEQC_WITH_MY_BASIC)
 	basic_interpreter = new KeroBasicAdapter(this);
 #else
 	basic_interpreter = new DisabledBasic(this);

@@ -101,8 +101,6 @@ libiphreeqc_la_SOURCES=\
 	phreeqcpp/nvector_serial.cpp\
 	phreeqcpp/nvector_serial.h\
 	phreeqcpp/parse.cpp\
-	phreeqcpp/PBasic.cpp\
-	phreeqcpp/PBasic.h\
 	phreeqcpp/phqalloc.cpp\
 	phreeqcpp/phqalloc.h\
 	phreeqcpp/Phreeqc.cpp\

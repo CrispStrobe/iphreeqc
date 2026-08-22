@@ -248,7 +248,6 @@ COMMON_CXXOBJS = \
 	       NameDouble.o \
 	       NumKeyword.o \
 	       Parser.o \
-	       PBasic.o \
 	       PHRQ_base.o \
 	       PHRQ_io.o \
 	       PPassemblageComp.o \
@@ -581,7 +580,6 @@ basicsubs.o: ../basicsubs.cpp ../Phreeqc.h ../common/phrqtype.h \
  ../cxxMix.h ../Use.h ../Surface.h ../SurfaceComp.h ../NameDouble.h \
  ../common/Parser.h ../common/PHRQ_base.h ../common/PHRQ_io.h \
  ../SurfaceCharge.h ../global_structures.h ../NA.h ../phqalloc.h \
- ../common/Utils.h ../common/phrqtype.h ../PBasic.h ../Exchange.h \
  ../ExchComp.h ../GasPhase.h ../GasComp.h ../PPassemblage.h \
  ../PPassemblageComp.h ../SSassemblage.h ../SS.h ../SScomp.h \
  ../cxxKinetics.h ../KineticsComp.h ../Solution.h ../SolutionIsotope.h \
@@ -702,7 +700,6 @@ mainsubs.o: ../mainsubs.cpp ../common/Utils.h ../common/phrqtype.h \
  ../NumKeyword.h ../UserPunch.h ../Pressure.h ../cxxMix.h ../Use.h \
  ../Surface.h ../SurfaceComp.h ../NameDouble.h ../common/Parser.h \
  ../common/PHRQ_base.h ../common/PHRQ_io.h ../SurfaceCharge.h \
- ../global_structures.h ../NA.h ../phqalloc.h ../PBasic.h \
  ../Temperature.h ../Exchange.h ../ExchComp.h ../GasPhase.h ../GasComp.h \
  ../Reaction.h ../PPassemblage.h ../PPassemblageComp.h ../SSassemblage.h \
  ../SS.h ../SScomp.h ../cxxKinetics.h ../KineticsComp.h ../Solution.h \
@@ -731,7 +728,6 @@ parse.o: ../parse.cpp ../Phreeqc.h ../common/phrqtype.h ../cvdense.h \
  ../Surface.h ../SurfaceComp.h ../NameDouble.h ../common/Parser.h \
  ../common/PHRQ_base.h ../common/PHRQ_io.h ../SurfaceCharge.h \
  ../global_structures.h ../NA.h ../phqalloc.h
-PBasic.o: ../PBasic.cpp ../PBasic.h ../common/phrqtype.h \
  ../common/PHRQ_base.h ../global_structures.h ../Surface.h \
  ../NumKeyword.h ../SurfaceComp.h ../NameDouble.h ../common/Parser.h \
  ../common/PHRQ_base.h ../PhreeqcKeywords/Keywords.h ../common/PHRQ_io.h \
@@ -760,7 +756,6 @@ Phreeqc.o: ../Phreeqc.cpp ../Phreeqc.h ../common/phrqtype.h ../cvdense.h \
  ../ISolution.h ../ISolutionComp.h ../Reaction.h ../PPassemblage.h \
  ../PPassemblageComp.h ../Exchange.h ../ExchComp.h ../GasPhase.h \
  ../GasComp.h ../SSassemblage.h ../SS.h ../SScomp.h ../cxxKinetics.h \
- ../KineticsComp.h ../phqalloc.h ../PBasic.h ../Temperature.h
 PHRQ_io_output.o: ../PHRQ_io_output.cpp ../Phreeqc.h ../common/phrqtype.h \
  ../cvdense.h ../cvode.h ../sundialstypes.h ../nvector.h ../dense.h \
  ../smalldense.h ../runner.h ../StorageBinList.h ../common/PHRQ_base.h \

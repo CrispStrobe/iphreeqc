@@ -77,8 +77,6 @@ phreeqc_SOURCES=\
 	nvector_serial.cpp\
 	nvector_serial.h\
 	parse.cpp\
-	PBasic.cpp\
-	PBasic.h\
 	phqalloc.cpp\
 	phqalloc.h\
 	Phreeqc.cpp\
