@@ -30,6 +30,17 @@ const char KERO_NO_NEWLINE_MARKER[] = "\x1eKEROTAKIS_NO_NEWLINE\x1e";
 const size_t KERO_ARRAY_ELEMENT_BUDGET = 1000000;
 const size_t KERO_HEAP_BYTE_BUDGET = 256 * 1024 * 1024; // 256 MiB
 
+int kero_basic_deadline_seconds()
+{
+	const char* env = std::getenv("KERO_BASIC_DEADLINE_SECS");
+	if (env)
+	{
+		int val = std::atoi(env);
+		if (val > 0) return val;
+	}
+	return 10;
+}
+
 // Global state for the tracked memory allocator. All MY-BASIC access is
 // serialized under my_basic_mutex(), so a single static counter is safe.
 static size_t g_heap_bytes = 0;
@@ -913,7 +924,7 @@ int KeroBasicAdapter::basic_run(char* commands, void* lnbase, void*, void*)
 		OutputBytes = 0;
 		ArrayElements = 0;
 		g_heap_bytes = 0;
-		Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+		Deadline = std::chrono::steady_clock::now() + std::chrono::seconds(kero_basic_deadline_seconds());
 	}
 	program->data_cursor = 0;
 	Program* previous = ActiveProgram;
