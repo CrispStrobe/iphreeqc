@@ -1,3 +1,4 @@
+// Modified by Christian Ströbele and Kerotakis contributors, 2026-08-21 to 2026-08-22: checked thermochemistry, chart export, and bounded MY-BASIC integration; see git history for the exact extent.
 #if !defined(CURVEOBJECT_H_INCLUDED)
 #define CURVEOBJECT_H_INCLUDED
 #include <vector>

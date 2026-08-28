@@ -1,3 +1,4 @@
+REM Modified by Christian Ströbele and Kerotakis contributors, 2026-08-21 to 2026-08-22: checked thermochemistry, chart export, and bounded MY-BASIC integration; see git history for the exact extent.
 10 base_species$ = "FeHCO3+"
 20 base_species_charge$ = "+"
 30 base_ligand$ = "HCO3-"

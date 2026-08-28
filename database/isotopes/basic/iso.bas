@@ -1,3 +1,4 @@
+REM Modified by Christian Ströbele and Kerotakis contributors, 2026-08-21 to 2026-08-22: checked thermochemistry, chart export, and bounded MY-BASIC integration; see git history for the exact extent.
 10 n1 = 6
 20 n2 = 2
 30 dim a$(n1)
