@@ -1,3 +1,4 @@
+# Modified by Christian Ströbele and Kerotakis contributors, 2026-08-21 to 2026-08-22: checked thermochemistry, chart export, and bounded MY-BASIC integration; see git history for the exact extent.
 EXTRA_DIST=\
 	fimpl.h\
 	fwrap.h\

@@ -1,3 +1,4 @@
+# Modified by Christian Ströbele and Kerotakis contributors, 2026-08-21 to 2026-08-22: checked thermochemistry, chart export, and bounded MY-BASIC integration; see git history for the exact extent.
 # CMAKE_MSVC_RUNTIME_LIBRARY requires 3.15
 cmake_minimum_required(VERSION 3.20)
 
